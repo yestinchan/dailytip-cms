@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `post` (
   `html` MEDIUMTEXT NOT NULL,
   `add_time` datetime NOT NULL,
   `edit_time` datetime NULL,
+  `post_status` INT(2) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

@@ -1,0 +1,126 @@
+{% extends "admin/base_navbar.html" %}
+{% block title%}New post{% endblock %}
+{% set active_page='new-post' %}
+{% block main %}
+      <div class="editor-wrapper">
+        <form id="post-form">
+             {{xsrf_form_html()}}
+            <input type="hidden" id="post-id" name="id" />
+          <input class="title" type="text" placeholder="Title" name="title"/>
+          <div class="tagsinput-default">
+            <input name="categories" class="tagsinput" data-role="tagsinput" value="uncategorized" />
+            <input name="tags" class="tagsinput" data-role="tagsinput" value="untaged" />
+          </div>
+          <textarea name="content" id="editor" placeholder="Content here ...."></textarea>
+        </form>
+        <div class="button-group">
+          <button class="btn btn-inverse" id="btn-save">Save(S)</button>
+          <button class="btn btn-primary" id="btn-post">Post(P)</button>
+        </div>
+      </div>
+{% endblock %}
+
+{% block script%}
+    <script type="text/javascript" src="/static/js/marked.js"></script>
+    <script type="text/javascript" src="/static/js/editor.js"></script>
+    <script type="text/javascript">
+ function generate(type, text) {
+            var n = noty({
+                text        : text,
+                type        : type,
+                dismissQueue: true,
+                layout      : 'topRight',
+                closeWith   : ['click'],
+                theme       : 'relax',
+                maxVisible  : 10,
+                animation   : {
+                    open  : 'animated bounceInDown',
+                    close : 'animated bounceOutDown',
+                    easing: 'swing',
+                    speed : 500
+                }
+            });
+            return n;
+        }
+   // (function($) {
+      var editor = new Editor();
+      editor.render();
+      resize_editor();
+
+      $(window).resize(function(){
+         if(window.outerHeigth==screen.heigth && window.outerWidth==screen.width){
+            $('.CodeMirror').css({"height":"100%"});
+         }else{
+            resize_editor();
+         }
+      });
+
+    function resize_editor(){
+      $('.CodeMirror').css({"height":$(window).height() - 400 - $(".tagsinput-default").height()+'px'});
+    }
+
+    function submit_form(url_, func){
+        $("#editor").html(editor.codemirror.getValue());
+        $.ajax({
+        url:url_,
+        data:$("#post-form").serialize(),
+        type:"post",
+        dataType:"json"
+        }).done(func);
+    }
+
+    function save_draft(){
+        submit_form('/admin/ajax/post/save', function(data){
+            if($("#post-form #post-id").attr('value') == undefined){
+                //insert id
+               $("#post-form #post-id").attr('value',data.id);
+            }
+            var n = generate('success','saved');
+            setTimeout(function(){
+                 $.noty.close(n.options.id);
+              },2000);
+        });
+    }
+
+    function publish(){
+        submit_form('/admin/ajax/post/publish', function(data){
+            if($("#post-form #post-id").attr('value') == undefined){
+                //insert id
+               $("#post-form #post-id").attr('value',data.id);
+            }
+            var n = generate('success','published');
+            setTimeout(function(){
+                 $.noty.close(n.options.id);
+              },2000);
+        });
+    }
+
+    $(document).keydown(function(e){
+      if(e.ctrlKey && e.which == 80){
+        e.preventDefault();
+        console.log("ctrl+p");
+        publish();
+      } else if(e.ctrlKey && e.which == 83){
+        e.preventDefault();
+        console.log("ctrl+s");;
+        save_draft();
+      }
+    });
+
+    $("#btn-save").on('click',function(){save_draft();});
+    $("#btn-publish").on('click',function(){publish();});
+
+    /* editor shotcuts:
+    var shortcuts = {
+      'Cmd-B': toggleBold,
+      'Cmd-I': toggleItalic,
+      'Cmd-K': drawLink,
+      'Cmd-Alt-I': drawImage,
+      "Cmd-'": toggleBlockquote,
+      'Cmd-Alt-L': toggleOrderedList,
+      'Cmd-L': toggleUnOrderedList
+    };
+    */
+   // })(jQuery);
+    </script>
+{% endblock %}

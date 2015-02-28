@@ -1,0 +1,28 @@
+{% extends 'base.html'%}
+{% set active_page = 'archives'%}
+{% block main %}
+   <div class="content-wrapper">
+			<div class="archives">
+				{% for key in grouped_posts.keys()%}
+				<div class="group-title">
+					<span>{{key}}</span>
+				</div>
+				<div class="group-content">
+					{% for post in grouped_posts.get(key)%}
+					<div class="archive">
+						<div class="archive-head" id="post-{{post.id}}">
+							<h2>{{post.title}}</h2>
+						</div>
+						<div class="archive-content">
+							{{post.text}}
+						</div>
+						<a href="/post/{{post.id}}"></a>
+					</div>
+					{% endfor %}
+				</div>
+				{% endfor %}
+			<div class="clearfloat"></div>
+		</div>
+   </div>
+
+{% endblock %}

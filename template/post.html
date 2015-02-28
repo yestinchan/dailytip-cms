@@ -1,0 +1,28 @@
+{% extends 'base.html'%}
+{% set active_page = 'archives'%}
+{% block main %}
+   <div class="content-wrapper">
+		<div class="single-wrapper">
+			<div class="single-post">
+				<div class="post-head">
+					<h1 class="post-title">{{post.title}}</h1>
+					<div class="post-meta">
+						<span class="post-time">{{post.add_time}}</span>
+					</div>
+				</div>
+				<div class="post-content">
+					{{post.html}}
+				</div>
+			</div>
+		</div>
+	   <div class="post-pagination">
+		   {% if not previous == None %}
+		   <a href="/post/{{previous.id}}">← {{previous.title}}</a>
+		   {% endif %}
+		   {% if not next == None %}
+		   <a href="/post/{{next.id}}" class="right">{{next.title}} →</a>
+		   {% endif %}
+	   </div>
+	</div>
+
+{% endblock %}

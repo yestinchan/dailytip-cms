@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% block head %}
+    <style>
+    .main{margin-top:80px;width:100%; padding-left: 50px; padding-right: 50px;min-height: 500px;}
+        .breadcrumb a, .breadcrumb {font-size:1.5rem; padding:4px;}
+      .foot{text-align: center; padding:5px;}
+      .foot > p{margin-bottom:0;}
+      .editor-wrapper{margin-bottom: 20px;}
+      .editor-wrapper .button-group{text-align: right; padding:10px;}
+        .pagination-wrapper{width:100%; text-align:center;}
+        .pagination-summary{font-size:1.4rem;}
+    </style>
+{% endblock %}
+{% block body %}
+    <!-- /.container -->
+    <header class="head">
+      <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <!-- Navbar content -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+          <span class="sr-only">Toggle navigation</span>
+        </button>
+        <a class="navbar-brand" href="#">YTip</a>
+      </div>
+
+{% set navigation_bar = [
+    ('/admin/post/new','new-post', 'New post'),
+    ('/admin/post/list','posts', 'Posts'),
+    ('/admin/users/list','users', 'Users')
+] -%}
+{% set active_page = active_page|default('new-post') -%}
+      <ul class="nav navbar-nav">
+        {% for href, id, caption in navigation_bar %}
+          <li {% if id == active_page %} class="active"{% endif%}>
+          <a href="{{ href|e }}">{{ caption|e }}</a></li>
+        {% endfor %}
+      </ul>
+      <div class="navbar-right">
+        <p class="navbar-text">Signed in as <a class="navbar-link" href="/admin/user/settings">{{user}}</a></p>
+      </div>
+      </nav>
+    </header>
+    <div class="main">
+        {% block main %} {% endblock %}
+    </div>
+    <footer class="foot">
+      <p>yestin &copy; build with ♥</p>
+    </footer>
+{% endblock %}

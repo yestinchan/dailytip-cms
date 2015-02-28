@@ -2,6 +2,10 @@
 # -*- coding:utf-8 -*-
 __author__ = 'yestin'
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 from tornado import ioloop,web
 import tornado
 import os
@@ -28,10 +32,18 @@ class Application(tornado.web.Application):
 
 
 route = list([
-    (r"/",handlers.IndexHandler ),
+    (r"/",handlers.PagedIndexHandler ),
+    (r"/page/(.*)",handlers.PagedIndexHandler),
+    (r"/archives/(.*)",handlers.ArchivesHanlder),
+    (r"/archives",handlers.ArchivesHanlder),
     (r"/post/(.*)",handlers.PostHandler),
     (r"/admin/login", handlers.AdminLoginHandler),
     (r"/admin/",handlers.AdminHandler),
+    (r"/admin/post/new",handlers.AdminPostNewHandler),
+    (r"/admin/post/list",handlers.AdminPostListHandler),
+    (r"/admin/post/edit",handlers.AdminPostEditHandler),
+    (r"/admin/ajax/post/publish",handlers.AdminPostAjaxPublishHandler),
+    (r"/admin/ajax/post/save",handlers.AdminPostAjaxSaveHandler),
     (r"/(.*)",handlers.PageHandler),
 ])
 

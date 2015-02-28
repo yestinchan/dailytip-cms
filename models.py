@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 __author__ = 'yestin'
 
 import datetime
@@ -90,32 +91,85 @@ class Post():
         return db.query("SELECT * FROM {0}".format(cls.table))
 
     @classmethod
-    def get(cls, db, id):
-        return db.get("SELECT * FROM {0} WHERE id = %s limit 1".format(cls.table), id)
+    def count(cls,db):
+        return db.query("SELECT count(*) FROM {0}".format(cls.table))[0].values()[0]
+
+    '''
+        select * from post,tag,category where post.id = tag.post_id and post.id = category.post_id and
+            id in (select rs.id from (select * from post limit 1,1) as rs)
+    '''
+    @classmethod
+    def list(cls, db, page, size):
+        raw_result =  db.query("SELECT * FROM {0},{1},{2} where {0}.id = {1}.post_id and {0}.id = {2}.post_id"
+                        " and id in (select rs.id from (select * from {0} order by {0}.id desc limit %s,%s) as rs) order by {0}.id desc"
+                               .format(cls.table,Tag.table,Category.table),page*size, size)
+        #compact.
+        return cls._compact_result(raw_result)
 
     @classmethod
-    def update(cls, db, id, title,  markdown, html,  categories, tags):
+    def _compact_result(cls, raw_result):
+        result = {}
+        for post in raw_result:
+            if result.get(post.id) == None:
+                result[post.id] = post
+                result[post.id].tags = [post.tag_name]
+                result[post.id].categories = [post.category_name]
+            else :
+                if not post.tag_name in result[post.id].tags:
+                    result[post.id].tags.append(post.tag_name)
+                if not post.category_name in result[post.id].categories:
+                    result[post.id].categories.append(post.category_name)
+        return result.values()
+
+    @classmethod
+    def get(cls, db, id):
+        raw_result =  db.query("SELECT * FROM {0},{1},{2} WHERE {0}.id = {1}.post_id and {0}.id = {2}.post_id "
+                        "and {0}.id = %s".format(cls.table,Tag.table,Category.table), id)
+        return cls._compact_result(raw_result)[0]
+
+    @classmethod
+    def previous(cls, db, id):
+        raw_result = db.query("SELECT * FROM {0}  WHERE {0}.id < %s order by id desc limit 0,1".format(cls.table), id)
+        return raw_result and raw_result[0] or None
+
+    @classmethod
+    def next(cls, db, id):
+        raw_result = db.query("SELECT * FROM {0}  WHERE {0}.id > %s order by id desc limit 0,1".format(cls.table), id)
+        return raw_result and raw_result[0] or None
+
+    '''
+    status = 0 draft
+    status = 1 published
+    '''
+    @classmethod
+    def update(cls, db, id, title,  markdown, html, categories, tags, status = -1):
         db._db.autocommit(False)
         now = datetime.datetime.now()
         now_str =  now.strftime('%Y-%m-%d %H:%M:%S')
-        db.update("UPDATE {0} set title = %s , markdown = %s, html = %s , edit_time = %s where id=%s"
+        if status == -1:
+            result = db.update("UPDATE {0} set title = %s , markdown = %s, html = %s , edit_time = %s where id=%s"
                   .format(cls.table), title, markdown, html, now_str, id)
+        else:
+            result = db.update("UPDATE {0} set title = %s , markdown = %s, html = %s , edit_time = %s, post_status = %s where id=%s"
+                  .format(cls.table), title, markdown, html, now_str, status, id)
         Tag._update_post_tags(db, id, tags)
         Category._update_post_categories(db, id, categories)
         db._db.commit()
         db._db.autocommit(True)
+        return result
 
     @classmethod
-    def add(cls, db , title, markdown , html, categories, tags):
+    def add(cls, db , title, markdown , html, categories, tags, status=-1):
         db._db.autocommit(False)
         now = datetime.datetime.now()
         now_str =  now.strftime('%Y-%m-%d %H:%M:%S')
-        post_id = db.insert("INSERT INTO {0} (title, markdown, html, add_time, edit_time) VALUES (%s,%s,%s,%s,%s)"
-                  .format(cls.table), title, markdown, html, now_str, now_str)
+        result = post_id = db.insert("INSERT INTO {0} (title, markdown, html, add_time, edit_time,post_status) VALUES (%s,%s,%s,%s,%s,%s)"
+                  .format(cls.table), title, markdown, html, now_str, now_str, status)
         Tag.add_post_tags(db, post_id, tags)
         Category.add_post_categories(db, post_id, categories)
         db._db.commit()
         db._db.autocommit(True)
+        return result
 
     @classmethod
     def delete(cls, db, id):
@@ -168,7 +222,8 @@ if __name__ == "__main__":
                 user=config['db_user'], password=config['db_pass'], max_idle_time=config['db_idle_time'])
 
     #Post.add(db, "test","test","test")
-    post = Post.all(db)
+    #post = Post.all(db)
+    post = Post.list(db,0,10)
     for item in post:
         print item.title
 

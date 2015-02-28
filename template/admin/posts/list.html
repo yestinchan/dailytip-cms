@@ -1,0 +1,57 @@
+{% extends "admin/base_navbar.html" %}
+{% block title%}Posts{% endblock %}
+{% set active_page='posts' %}
+{% block main %}
+      <div class="table-container">
+        <table class="main-table table table-hover">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Categories</th>
+              <th>Tags</th>
+              <th>Views</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for post in posts%}
+            <tr>
+              <td>{{post.title}}</td>
+              <td>{% for cat in post.categories %} {{cat}} {% if not loop.last %},{% endif %}{%endfor%}</td>
+              <td>{% for tag in post.tags %} {{tag}} {% if not loop.last %},{% endif %}{%endfor%}</td>
+              <td>{{post.views}}</td>
+              <td>{{post.edit_time}}</td>
+              <td>{% if post.post_status == 0%} Draft {% elif post.post_status == 1%} Published {% endif %}</td>
+              <td><a href="/post/{{post.id}}">View</a>&nbsp;|&nbsp;<a href="/admin/post/edit?id={{post.id}}">Edit</a></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+<div class="pagination-wrapper">
+    <div class="pagination">
+        <div class="pagination-summary">
+            <span>Total Pages : {{total_pages}}</span>
+        </div>
+        <ul>
+            {% if page > 0 %}
+          <li class="previous">
+            <a href="list?page={{page-1}}" class="fui-arrow-left"></a>
+          </li>
+            {% endif %}
+            {% for i in range(page-5,page+5)%}
+                {% if i >= 0 and i < total_pages%}
+                    <li {% if i == page %}class="active"{% endif %}><a href="list?page={{i}}">{{i}}</a></li>
+                {% endif %}
+            {% endfor %}
+        {% if not (page +1) == total_pages%}
+          <li class="next">
+            <a href="list?page={{page+1}}" class="fui-arrow-right"></a>
+          </li>
+            {% endif %}
+        </ul>
+      </div>
+    </div>
+{% endblock %}

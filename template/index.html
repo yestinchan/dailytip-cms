@@ -1,9 +1,73 @@
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>{{site_title}}</title>
-    </head>
-    <body>
-    Hi Index!
-    </body>
-</html>
+{% extends 'base.html'%}
+{% block main %}
+    <div class="content-wrapper">
+			<div class="left-column">
+				<div class="posts">
+                    {% for post in posts %}
+                    <div class="post-wrapper">
+						<div class="post">
+							<div class="post-head">
+								<h2><a href="/post/{{post.id}}">{{post.title}}</a></h2>
+							</div>
+							<div class="post-content">
+								{{post.html}}
+							</div>
+							<div class="post-foot">
+								<span>{{post.add_time}}</span>
+								<span>{{post.view}}</span>
+							</div>
+						</div>
+					</div>
+                    {% endfor %}
+                </div>
+                <div class="page">
+					<ul class="pagination-plain">
+                        {% if page > 0%}
+					  <li class="previous">
+					    <a href="/page/{{page-1}}">← Newer</a>
+					  </li>
+                        {% endif %}
+                        {% for i in range(page-2,page+3)%}
+                            {% if i >= 0 and i < total_pages%}
+                                <li {% if i == page %} class="active"{% endif %}><a href="/page/{{i}}">{{i}}</a></li>
+                            {% endif %}
+                        {% endfor %}
+					  {% if not (page+1) == total_pages %}
+					  <li class="next">
+					    <a href="/page/{{page+1}}">Older →</a>
+					  </li>
+                        {% endif %}
+					</ul>
+				</div>
+            </div>
+            <div class="right-column">
+				<div class="widget cat-widget">
+					<div class="widget-title">
+						<span>Categories</span>
+					</div>
+					<div class="widget-content">
+                        {% for cat in categories %}
+						<button class="btn btn-success tag">{{cat.category_name}}</button>
+                        {% endfor %}
+					</div>
+					<div class="widget-foot">
+
+					</div>
+                </div>
+                <div class="widget tag-widget">
+					<div class="widget-title">
+						<span>Tags</span>
+					</div>
+					<div class="widget-content">
+						{% for tag in tags %}
+						<button class="btn btn-success tag">{{tag.tag_name}}</button>
+                        {% endfor %}
+					</div>
+					<div class="widget-foot">
+
+					</div>
+				</div>
+            </div>
+    </div>
+
+{% endblock %}

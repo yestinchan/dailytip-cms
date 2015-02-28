@@ -1,15 +1,84 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title>Admin Login Page</title>
-</head>
-<body>
-    <form method="post">
-        {{xsrf_form_html()}}
-        <input type="text" id="name" name="name">
-        <input type="password" id="password" name="password">
-        <input type="submit" value="Login">
-    </form>
-</body>
-</html>
+{% extends "admin/base.html" %}
+{% block head %}
+    <style>
+    .login-bg{min-height: 600px;padding-top:150px;background-color: #1abc9c;height: 100%;}
+    .login-form{width:500px;margin:auto;}
+    .control-group > input{width:100%;}
+    .control-group{padding:5px;}
+    .login-title{text-align: center;}
+    .login-title > h1 {font-size: 2.5rem; color:#f1f1f1;}
+    html , body , .login-bg {height:100%;}
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="login-bg">
+          <div class="login-title">
+            <h1>Login please, Master</h1>
+          </div>
+          <form class="login-form" method="post">
+            {{xsrf_form_html()}}
+            <div class="control-group">
+              <input type="text" class="login-field" value="" placeholder="Enter your name" id="login-name" name="name">
+              <label class="login-field-icon fui-man-16" for="login-name"></label>
+            </div>
+
+            <div class="control-group">
+              <input type="password" class="login-field" value="" placeholder="Password" id="login-pass" name="password">
+              <label class="login-field-icon fui-lock-16" for="login-pass"></label>
+            </div>
+
+            <input class="btn btn-primary btn-large btn-block" type="submit" value="Login">
+            <a class="login-link" href="#" id="lost-password">Lost your password?</a>
+          </form>
+    </div>
+{% endblock %}
+{% block script%}
+    <script type="text/javascript">
+    function getParam(par){
+        var local_url = document.location.href;
+        var get = local_url.indexOf(par +"=");
+        if(get == -1){
+            return false;
+        }
+        var get_par = local_url.slice(par.length + get + 1);
+        var nextPar = get_par.indexOf("&");
+        if(nextPar != -1){
+            get_par = get_par.slice(0, nextPar);
+        }
+        return get_par;
+    }
+     function generate(type, text) {
+            var n = noty({
+                text        : text,
+                type        : type,
+                dismissQueue: true,
+                layout      : 'center',
+                closeWith   : ['click'],
+                theme       : 'relax',
+                maxVisible  : 10,
+                animation   : {
+                    open  : 'animated bounceInDown',
+                    close : 'animated bounceOutDown',
+                    easing: 'swing',
+                    speed : 500
+                }
+            });
+            return n;
+        }
+      $(document).ready(function(){
+        var error = getParam('error');
+        if(error){
+            var n = generate('error','name or password not match');
+            setTimeout(function(){
+                 $.noty.close(n.options.id);
+              },4000);
+        }
+        $("#lost-password").on('click',function(e){
+          var n = generate('success','You know what to do :)');
+              setTimeout(function(){
+                 $.noty.close(n.options.id);
+              },4000);
+        })
+      })
+    </script>
+{% endblock %}

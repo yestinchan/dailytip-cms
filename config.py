@@ -19,7 +19,7 @@ config = dict(
         db_user = "yestin",
         db_pass = "yestinPass",
         db_idle_time = 10,
-        site_title=u"Site title",
+        site_title=u"Daily Tip",
         site_description=u"description",
         site_keywords=u"keywords",
 )
